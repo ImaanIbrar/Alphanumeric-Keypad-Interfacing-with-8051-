@@ -1,0 +1,538 @@
+C51 COMPILER V9.60.7.0   CODE                                                              12/20/2023 15:49:43 PAGE 1   
+
+
+C51 COMPILER V9.60.7.0, COMPILATION OF MODULE CODE
+OBJECT MODULE PLACED IN .\Objects\code.obj
+COMPILER INVOKED BY: C:\Keil_v5\C51\BIN\C51.EXE code.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\code
+                    -.lst) TABS(2) OBJECT(.\Objects\code.obj)
+
+line level    source
+
+   1          #include <reg51.h>
+   2          
+   3          // Define keypad pins
+   4          sbit col1 = P1^4;
+   5          sbit col2 = P1^5;
+   6          sbit col3 = P1^6;
+   7          sbit row1 = P1^0;
+   8          sbit row2 = P1^1;
+   9          sbit row3 = P1^2;
+  10          sbit row4 = P1^3;
+  11          
+  12          // Define LCD pins
+  13          sfr ldata = 0xA0;
+  14          sbit rs = P3^2;
+  15          sbit rw = P3^3;
+  16          sbit en = P3^4;
+  17          
+  18          // Define push button pins
+  19          sbit clearAllButton = P0^0;
+  20          sbit clearCharButton = P0^1;
+  21          
+  22          // Constants
+  23          #define DELAY_SHORT 1
+  24          #define DELAY_MEDIUM 4
+  25          #define DELAY_LONG 10
+  26          #define NUM_KEYS 10
+  27          
+  28          unsigned char chk_agn[NUM_KEYS] = {0};
+  29          unsigned char pos = 128, c = 0;
+  30          
+  31          // Function prototypes
+  32          void lcdcmd(unsigned char value);
+  33          void lcddata(unsigned char value);
+  34          void delay(unsigned char itime);
+  35          void display(unsigned char a, unsigned char b);
+  36          void num_check(unsigned char a);
+  37          void repeat(unsigned char a);
+  38          void clearScreen(void);
+  39          void clearChar(void);
+  40          
+  41          void main() {
+  42   1          unsigned char j, d;
+  43   1      
+  44   1          lcdcmd(0x38);
+  45   1          delay(DELAY_LONG);
+  46   1          lcdcmd(0x0F);
+  47   1          delay(DELAY_LONG);
+  48   1          lcdcmd(pos);
+  49   1      
+  50   1          col1 = col2 = col3 = 1;
+  51   1      
+  52   1          while (1) {
+  53   2              if (clearAllButton == 1) {
+  54   3                  clearScreen();
+C51 COMPILER V9.60.7.0   CODE                                                              12/20/2023 15:49:43 PAGE 2   
+
+  55   3                  delay(DELAY_SHORT);
+  56   3              } else if (clearCharButton == 1) {
+  57   3                  clearChar();
+  58   3                  delay(DELAY_SHORT);
+  59   3              } else {
+  60   3              do {
+  61   4                  row1 = row2 = row3 = row4 = 0;
+  62   4              } while (col1 == 0 || col2 == 0 || col3 == 0);
+  63   3      
+  64   3              while (1) {
+  65   4                  row2 = row3 = row4 = 1;
+  66   4                  row1 = 0;
+  67   4      
+  68   4                  if (col1 == 0 || col2 == 0 || col3 == 0) {
+  69   5                      j = 0;
+  70   5                      if (col1 == 0) {
+  71   6                          chk_agn[1]++;
+  72   6                          display(1, chk_agn[1]);
+  73   6                      } else if (col2 == 0) {
+  74   6                          chk_agn[2]++;
+  75   6                          display(2, chk_agn[2]);
+  76   6                      } else if (col3 == 0) {
+  77   6                          chk_agn[3]++;
+  78   6                          display(3, chk_agn[3]);
+  79   6                      }
+  80   5                      break;
+  81   5                  }
+  82   4      
+  83   4                  row1 = row3 = row4 = 1;
+  84   4                  row2 = 0;
+  85   4      
+  86   4                  if (col1 == 0 || col2 == 0 || col3 == 0) {
+  87   5                      j = 1;
+  88   5                      if (col1 == 0) {
+  89   6                          chk_agn[4]++;
+  90   6                          display(4, chk_agn[4]);
+  91   6                      } else if (col2 == 0) {
+  92   6                          chk_agn[5]++;
+  93   6                          display(5, chk_agn[5]);
+  94   6                      } else if (col3 == 0) {
+  95   6                          chk_agn[6]++;
+  96   6                          display(6, chk_agn[6]);
+  97   6                      }
+  98   5                      break;
+  99   5                  }
+ 100   4      
+ 101   4                  row1 = row2 = row4 = 1;
+ 102   4                  row3 = 0;
+ 103   4      
+ 104   4                  if (col1 == 0 || col2 == 0 || col3 == 0) {
+ 105   5                      j = 2;
+ 106   5                      if (col1 == 0) {
+ 107   6                          chk_agn[7]++;
+ 108   6                          display(7, chk_agn[7]);
+ 109   6                      } else if (col2 == 0) {
+ 110   6                          chk_agn[8]++;
+ 111   6                          display(8, chk_agn[8]);
+ 112   6                      } else if (col3 == 0) {
+ 113   6                          chk_agn[9]++;
+ 114   6                          display(9, chk_agn[9]);
+ 115   6                      }
+ 116   5                      break;
+C51 COMPILER V9.60.7.0   CODE                                                              12/20/2023 15:49:43 PAGE 3   
+
+ 117   5                  }
+ 118   4      
+ 119   4                  row1 = row2 = row3 = 1;
+ 120   4                  row4 = 0;
+ 121   4      
+ 122   4                  if (col1 == 0 || col2 == 0 || col3 == 0) {
+ 123   5                      j = 3;
+ 124   5                      if (col1 == 0) {
+ 125   6                          lcddata('*');
+ 126   6                          delay(10);
+ 127   6                          c++;
+ 128   6                      } else if (col2 == 0) {
+ 129   6                          chk_agn[0]++;
+ 130   6                          display(0, chk_agn[0]);
+ 131   6                      } else if (col3 == 0) {
+ 132   6                          lcddata('#');
+ 133   6                          delay(10);
+ 134   6                          c++;
+ 135   6                      }
+ 136   5                      break;
+ 137   5                  }
+ 138   4              }
+ 139   3          }
+ 140   2      }
+ 141   1      
+ 142   1      void num_check(unsigned char a) {
+*** ERROR C141 IN LINE 142 OF code.c: syntax error near 'void', expected '__asm'
+ 143   1          unsigned char j;
+ 144   1          c++;
+ 145   1      
+ 146   1          for (j = 0; j < 10; j++) {
+ 147   2              if (j != a)
+ 148   2                  chk_agn[j] = 0;
+ 149   2          }
+ 150   1      
+ 151   1          if (chk_agn[a] == 4) {
+ 152   2              c--;
+ 153   2              chk_agn[a] = 0;
+ 154   2          }
+ 155   1      }
+ 156          
+ 157          void repeat(unsigned char a) {
+ 158   1          if (chk_agn[a] > 1)
+ 159   1              c--;
+ 160   1          lcdcmd(pos + c);
+ 161   1      }
+ 162          void display(unsigned char a ,unsigned char b)   // Display function
+ 163          {
+ 164   1      switch(b)
+ 165   1      {
+ 166   2        case 1:
+ 167   2         {
+ 168   3          switch(a)
+ 169   3          {
+ 170   4           case 1:{
+ 171   5             repeat(1);
+ 172   5             lcddata('a');
+ 173   5             delay(4);
+ 174   5             num_check(1);
+ 175   5             break;
+ 176   5             }
+ 177   4           case 2:{
+C51 COMPILER V9.60.7.0   CODE                                                              12/20/2023 15:49:43 PAGE 4   
+
+ 178   5             repeat(2);
+ 179   5           lcddata('d');
+ 180   5             delay(4);
+ 181   5             num_check(2);
+ 182   5             break;
+ 183   5             }
+ 184   4           case 3: {
+ 185   5             repeat(3);
+ 186   5             lcddata('g');
+ 187   5             delay(4);
+ 188   5             num_check(3);
+ 189   5             break;
+ 190   5             }
+ 191   4           case 4:{
+ 192   5             repeat(4);
+ 193   5             lcddata('j');
+ 194   5             delay(4);
+ 195   5             num_check(4);
+ 196   5             break;
+ 197   5             }
+ 198   4           case 5:{
+ 199   5             repeat(5);
+ 200   5             lcddata('m');
+ 201   5             delay(4);
+ 202   5             num_check(5);
+ 203   5             break;
+ 204   5             }
+ 205   4           case 6:{
+ 206   5             repeat(6);
+ 207   5             lcddata('p');
+ 208   5             delay(4);
+ 209   5             num_check(6);
+ 210   5             break;
+ 211   5             }
+ 212   4           case 7:{
+ 213   5             repeat(7);
+ 214   5             lcddata('s');
+ 215   5             delay(4);
+ 216   5             num_check(7);
+ 217   5             break;
+ 218   5             }
+ 219   4           case 8:{
+ 220   5             repeat(8);
+ 221   5             lcddata('v');
+ 222   5             delay(4);
+ 223   5             num_check(8);
+ 224   5             break;
+ 225   5             }
+ 226   4           case 9:{
+ 227   5             repeat(9); 
+ 228   5             lcddata('y');
+ 229   5             delay(4);
+ 230   5             num_check(9);
+ 231   5             break;
+ 232   5             }
+ 233   4           case 0:{ 
+ 234   5             repeat(0);
+ 235   5             lcddata(' ');
+ 236   5             delay(4);
+ 237   5             num_check(0);
+ 238   5             break;
+ 239   5             }
+C51 COMPILER V9.60.7.0   CODE                                                              12/20/2023 15:49:43 PAGE 5   
+
+ 240   4          }
+ 241   3         break;
+ 242   3         }
+ 243   2        case 2:
+ 244   2         {
+ 245   3          switch(a)
+ 246   3           {
+ 247   4           case 1:{
+ 248   5             repeat(1);
+ 249   5             lcddata('b');
+ 250   5             delay(4);
+ 251   5             num_check(1);
+ 252   5             break;
+ 253   5             }
+ 254   4           case 2:{
+ 255   5             repeat(2);
+ 256   5             lcddata('e');
+ 257   5             delay(4);
+ 258   5             num_check(2);
+ 259   5             break;
+ 260   5             }
+ 261   4           case 3: {
+ 262   5             repeat(3);
+ 263   5             lcddata('h');
+ 264   5             delay(4);
+ 265   5             num_check(3);
+ 266   5             break;
+ 267   5             }
+ 268   4           case 4:{
+ 269   5             repeat(4);
+ 270   5             lcddata('k');
+ 271   5             delay(4);
+ 272   5             num_check(4);
+ 273   5             break;
+ 274   5             }
+ 275   4           case 5:{
+ 276   5             repeat(5);
+ 277   5             lcddata('n');
+ 278   5             delay(4);
+ 279   5             num_check(5);
+ 280   5             break;
+ 281   5             }
+ 282   4           case 6:{
+ 283   5             repeat(6);
+ 284   5             lcddata('q');
+ 285   5             delay(4);
+ 286   5             num_check(6);
+ 287   5             break;
+ 288   5             }
+ 289   4           case 7:{
+ 290   5             repeat(7);
+ 291   5             lcddata('t');
+ 292   5             delay(4);
+ 293   5             num_check(7);
+ 294   5             break;
+ 295   5             }
+ 296   4           case 8:{
+ 297   5             repeat(8);
+ 298   5             lcddata('w');
+ 299   5             delay(4);
+ 300   5             num_check(8);
+ 301   5             break;
+C51 COMPILER V9.60.7.0   CODE                                                              12/20/2023 15:49:43 PAGE 6   
+
+ 302   5             }
+ 303   4           case 9:{
+ 304   5             repeat(9); 
+ 305   5             lcddata('z');
+ 306   5             delay(4);
+ 307   5             num_check(9);
+ 308   5             break;
+ 309   5             }
+ 310   4           case 0:{
+ 311   5           repeat(0);
+ 312   5             lcddata('0');
+ 313   5             delay(4);
+ 314   5           num_check(0);
+ 315   5             break;
+ 316   5             }
+ 317   4           }
+ 318   3          break;
+ 319   3         }
+ 320   2        case 3:
+ 321   2         {
+ 322   3          switch(a)
+ 323   3           {
+ 324   4           case 1:{
+ 325   5             repeat(1);
+ 326   5             lcddata('c');
+ 327   5             delay(4);
+ 328   5             num_check(1);
+ 329   5             break;
+ 330   5             }
+ 331   4           case 2:{
+ 332   5             repeat(2);
+ 333   5             lcddata('f');
+ 334   5             delay(4);
+ 335   5             num_check(2);
+ 336   5             break;
+ 337   5             }
+ 338   4           case 3: {
+ 339   5             repeat(3);
+ 340   5             lcddata('i');
+ 341   5             delay(4);
+ 342   5             num_check(3);
+ 343   5             break;
+ 344   5             }
+ 345   4           case 4:{
+ 346   5             repeat(4);
+ 347   5             lcddata('l');
+ 348   5             delay(4);
+ 349   5             num_check(4);
+ 350   5             break;
+ 351   5             }
+ 352   4           case 5:{
+ 353   5             repeat(5);
+ 354   5             lcddata('o');
+ 355   5             delay(4);
+ 356   5             num_check(5);
+ 357   5             break;
+ 358   5             }
+ 359   4           case 6:{
+ 360   5             repeat(6);
+ 361   5             lcddata('r');
+ 362   5             delay(4);
+ 363   5             num_check(6);
+C51 COMPILER V9.60.7.0   CODE                                                              12/20/2023 15:49:43 PAGE 7   
+
+ 364   5             break;
+ 365   5             }
+ 366   4           case 7:{
+ 367   5             repeat(7);
+ 368   5             lcddata('u');
+ 369   5             delay(4);
+ 370   5             num_check(7);
+ 371   5             break;
+ 372   5             }
+ 373   4           case 8:{
+ 374   5             repeat(8);
+ 375   5             lcddata('x');
+ 376   5             delay(4);
+ 377   5             num_check(8);
+ 378   5             break;
+ 379   5             }
+ 380   4           case 9:{
+ 381   5             repeat(9); 
+ 382   5             lcddata('9');
+ 383   5             delay(4);
+ 384   5             num_check(9);
+ 385   5           chk_agn[9]=0;
+ 386   5             break;
+ 387   5             }
+ 388   4           case 0:{
+ 389   5           repeat(0);
+ 390   5             lcddata(' ');
+ 391   5             num_check(0);
+ 392   5             break;
+ 393   5             }
+ 394   4          }
+ 395   3        break;
+ 396   3           }
+ 397   2        case 4:
+ 398   2         {
+ 399   3          switch(a)
+ 400   3           {
+ 401   4           case 1:{
+ 402   5             repeat(1);
+ 403   5             lcddata('1');
+ 404   5             delay(4);
+ 405   5             num_check(1);
+ 406   5             break;
+ 407   5             }
+ 408   4           case 2:{
+ 409   5             repeat(2);
+ 410   5             lcddata('2');
+ 411   5             delay(4);
+ 412   5             num_check(2);
+ 413   5             break;
+ 414   5             }
+ 415   4           case 3: {
+ 416   5             repeat(3);
+ 417   5             lcddata('3');
+ 418   5             delay(4);
+ 419   5             num_check(3);
+ 420   5             break;
+ 421   5             }
+ 422   4           case 4:{
+ 423   5             repeat(4);
+ 424   5             lcddata('4');
+ 425   5             delay(4);
+C51 COMPILER V9.60.7.0   CODE                                                              12/20/2023 15:49:43 PAGE 8   
+
+ 426   5             num_check(4);
+ 427   5             break;
+ 428   5             }
+ 429   4           case 5:{
+ 430   5             repeat(5);
+ 431   5             lcddata('5');
+ 432   5             delay(4);
+ 433   5             num_check(5);
+ 434   5             break;
+ 435   5             }
+ 436   4           case 6:{
+ 437   5             repeat(6);
+ 438   5             lcddata('6');
+ 439   5             delay(4);
+ 440   5             num_check(6);
+ 441   5             break;
+ 442   5             }
+ 443   4           case 7:{
+ 444   5             repeat(7);
+ 445   5             lcddata('7');
+ 446   5             delay(4);
+ 447   5             num_check(7);
+ 448   5             break;
+ 449   5             }
+ 450   4           case 8:{
+ 451   5             repeat(8);
+ 452   5             lcddata('8');
+ 453   5             delay(4);
+ 454   5             num_check(8);
+ 455   5             break;
+ 456   5             }
+ 457   4           case 0:{
+ 458   5           repeat(0);
+ 459   5             lcddata('0');
+ 460   5             num_check(0);
+ 461   5             break;
+ 462   5             }
+ 463   4           }          
+ 464   3         break;
+ 465   3         }
+ 466   2      }}
+ 467          
+ 468          void lcdcmd (unsigned char value) //Function to send command to LCD
+ 469          {
+ 470   1      ldata =value;
+ 471   1      rs=0;
+ 472   1      rw=0;
+ 473   1      en=1;
+ 474   1      delay (1);
+ 475   1      en=0;
+ 476   1      }
+ 477          
+ 478          void lcddata (unsigned char value)  //Funtion to send data on LCD
+ 479          {
+ 480   1      ldata =value;
+ 481   1      rs=1;
+ 482   1      rw=0;
+ 483   1      en=1;
+ 484   1      delay(1);
+ 485   1      en=0;
+ 486   1      }
+ 487          
+C51 COMPILER V9.60.7.0   CODE                                                              12/20/2023 15:49:43 PAGE 9   
+
+ 488          void delay (unsigned char itime)  //Time delay function
+ 489          {
+ 490   1      unsigned int i,j;
+ 491   1          for(i=0;i<itime;i++)
+ 492   1        for(j=0;j<1275;j++);
+ 493   1      }
+ 494          void clearScreen() {
+ 495   1          lcdcmd(0x01);  // Clear display
+ 496   1          delay(DELAY_LONG);
+ 497   1          pos = 128;
+ 498   1          c = 0;
+ 499   1      }
+ 500          
+ 501          void clearChar() {
+ 502   1          if (c > 0) {
+ 503   2              c--;
+ 504   2              chk_agn[c % NUM_KEYS] = 0;
+ 505   2              lcdcmd(pos + c);
+ 506   2              lcddata(' ');  // Clear the character at the current position
+ 507   2              delay(DELAY_SHORT);
+ 508   2              lcdcmd(pos + c);
+ 509   2          }
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  1 ERROR(S)
